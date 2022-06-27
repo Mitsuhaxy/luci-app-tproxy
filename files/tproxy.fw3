@@ -96,34 +96,26 @@ function del_ipv4v6_set() {
 
 #enable_tproxy
 function enable_ipv4_tproxy() {
-    iptables -t mangle -N TP
-    iptables -t mangle -N TP_OUT
-    iptables -t mangle -A TP -m set --match-set lan4 dst -j RETURN
-    iptables -t mangle -A TP -m set --match-set gateway4 dst -j RETURN
-    iptables -t mangle -A TP -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
-    iptables -t mangle -A TP -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
-    iptables -t mangle -A TP_OUT -m set --match-set lan4 dst -j RETURN
-    iptables -t mangle -A TP_OUT -m set --match-set gateway4 dst -j RETURN
-    iptables -t mangle -A TP_OUT -m mark --mark 0xff/0xffffffff -j RETURN
-    iptables -t mangle -A TP_OUT -p tcp -j MARK --set-mark 0xfe/0xffffffff
-    iptables -t mangle -A TP_OUT -p udp -j MARK --set-mark 0xfe/0xffffffff
-    iptables -t mangle -A PREROUTING -j TP
-    iptables -t mangle -A OUTPUT -j TP_OUT
+    iptables -t mangle -A PREROUTING -m set --match-set lan4 dst -j RETURN
+    iptables -t mangle -A PREROUTING -m set --match-set gateway4 dst -j RETURN
+    iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
+    iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
+    iptables -t mangle -A OUTPUT -m set --match-set lan4 dst -j RETURN
+    iptables -t mangle -A OUTPUT -m set --match-set gateway4 dst -j RETURN
+    iptables -t mangle -A OUTPUT -m mark --mark 0xff/0xffffffff -j RETURN
+    iptables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xfe/0xffffffff
+    iptables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xfe/0xffffffff
 }
 function enable_ipv6_tproxy() {
-    ip6tables -t mangle -N TP
-    ip6tables -t mangle -N TP_OUT
-    ip6tables -t mangle -A TP -m set --match-set lan6 dst -j RETURN
-    ip6tables -t mangle -A TP -m set --match-set gateway6 dst -j RETURN
-    ip6tables -t mangle -A TP -p tcp -j TPROXY --on-ip ::1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
-    ip6tables -t mangle -A TP -p udp -j TPROXY --on-ip ::1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
-    ip6tables -t mangle -A TP_OUT -m set --match-set lan6 dst -j RETURN
-    ip6tables -t mangle -A TP_OUT -m set --match-set gateway6 dst -j RETURN
-    ip6tables -t mangle -A TP_OUT -m mark --mark 0xff/0xffffffff -j RETURN
-    ip6tables -t mangle -A TP_OUT -p tcp -j MARK --set-mark 0xfe/0xffffffff
-    ip6tables -t mangle -A TP_OUT -p udp -j MARK --set-mark 0xfe/0xffffffff
-    ip6tables -t mangle -A PREROUTING -j TP
-    ip6tables -t mangle -A OUTPUT -j TP_OUT
+    ip6tables -t mangle -A PREROUTING -m set --match-set lan6 dst -j RETURN
+    ip6tables -t mangle -A PREROUTING -m set --match-set gateway6 dst -j RETURN
+    ip6tables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip ::1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
+    ip6tables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip ::1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
+    ip6tables -t mangle -A OUTPUT -m set --match-set lan6 dst -j RETURN
+    ip6tables -t mangle -A OUTPUT -m set --match-set gateway6 dst -j RETURN
+    ip6tables -t mangle -A OUTPUT -m mark --mark 0xff/0xffffffff -j RETURN
+    ip6tables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xfe/0xffffffff
+    ip6tables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xfe/0xffffffff
 }
 function enable_ipv4v6_tproxy() {
     enable_ipv4_tproxy
