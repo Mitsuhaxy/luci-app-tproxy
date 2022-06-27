@@ -31,6 +31,7 @@ function del_ipv4v6_rule() {
 #add_set
 function add_ipv4_set() {
     ipset create lan4 hash:net family inet hashsize 1024
+    ipset flush lan4
     ipset add lan4 10.0.0.0/8
     ipset add lan4 100.64.0.0/10
     ipset add lan4 127.0.0.0/8
@@ -41,10 +42,12 @@ function add_ipv4_set() {
     ipset add lan4 255.255.255.255/32
     while ! ping -c 1 119.29.29.29; do sleep 1; done
     ipset create gateway4 hash:net family inet hashsize 1024
+    ipset flush gateway4
     ipset add gateway4 $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')
 }
 function add_ipv6_set() {
     ipset create lan6 hash:net family inet6 hashsize 1024
+    ipset flush lan6
     ipset add lan6 ::/128
     ipset add lan6 ::1/128
     ipset add lan6 ::ffff:0:0/96
@@ -56,6 +59,7 @@ function add_ipv6_set() {
     ipset add lan6 ff00::/8
     while ! ping6 -c 1 2402:4e00::; do sleep 1; done
     ipset create gateway6 hash:net family inet6 hashsize 1024
+    ipset flush gateway6
     ipset add gateway6 $(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].assigned.lan.address')/$(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].assigned.lan.mask')
 }
 function add_ipv4v6_set() {

@@ -1,0 +1,30 @@
+#!/bin/ash /etc/rc.common
+
+START=99
+STOP=1
+USE_PROCD=1
+NAME=tproxy
+
+source /usr/bin/tproxy
+
+MODE=$(uci get tproxy.options.mode)
+
+start_service() {
+    start_"$MODE"_service
+}
+
+stop_service() {
+    stop_"$MODE"_service
+}
+
+restart_service() {
+    restart_"$MODE"_service
+}
+
+reload_service() {
+    reload_"$MODE"_set
+}
+
+service_triggers() {
+    procd_add_interface_trigger "interface.*.up" "wan" /etc/init.d/tproxy reload
+}
