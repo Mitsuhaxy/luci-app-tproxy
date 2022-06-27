@@ -39,9 +39,9 @@ function add_ipv4_set() {
     ipset add lan4 192.168.0.0/16
     ipset add lan4 224.0.0.0/3
     ipset add lan4 255.255.255.255/32
-    while ! ping -c 2 119.29.29.29; do sleep 1; done
+    while ! ping -c 1 119.29.29.29; do sleep 1; done
     ipset create gateway4 hash:net family inet hashsize 1024
-    ipset add gateway4 $(ip address show pppoe-wan | grep '/32' | awk '{print $2}' | head -n 1)
+    ipset add gateway4 $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')
 }
 function add_ipv6_set() {
     ipset create lan6 hash:net family inet6 hashsize 1024
@@ -54,9 +54,9 @@ function add_ipv6_set() {
     ipset add lan6 fc00::/7
     ipset add lan6 fe80::/10
     ipset add lan6 ff00::/8
-    while ! ping6 -c 2 2402:4e00::; do sleep 1; done
+    while ! ping6 -c 1 2402:4e00::; do sleep 1; done
     ipset create gateway6 hash:net family inet6 hashsize 1024
-    ipset add gateway6 $(ip address show br-lan | grep '/60' | awk '{print $2}' | head -n 1)
+    ipset add gateway6 $(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].assigned.lan.address')/$(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].assigned.lan.mask')
 }
 function add_ipv4v6_set() {
     add_ipv4_set
@@ -66,14 +66,14 @@ function add_ipv4v6_set() {
 #reload_set
 function reload_ipv4_set() {
     ipset flush gateway4
-    while ! ping -c 2 119.29.29.29; do sleep 1; done
-    ipset add gateway4 $(ip address show pppoe-wan | grep '/32' | awk '{print $2}' | head -n 1)
+    while ! ping -c 1 119.29.29.29; do sleep 1; done
+    ipset add gateway4 $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')
 
 }
 function reload_ipv6_set() {
     ipset flush gateway6
-    while ! ping6 -c 2 2402:4e00::; do sleep 1; done
-    ipset add gateway6 $(ip address show br-lan | grep '/60' | awk '{print $2}' | head -n 1)
+    while ! ping6 -c 1 2402:4e00::; do sleep 1; done
+    ipset add gateway6 $(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].assigned.lan.address')/$(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].assigned.lan.mask')
 }
 function reload_ipv4v6_set() {
     reload_ipv4_set
