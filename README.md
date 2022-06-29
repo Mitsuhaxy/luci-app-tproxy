@@ -10,5 +10,4 @@
 
 ### Mode
 * ipv4 : ipv4 only
-* ipv6 : ipv6 only
-* ipv4v6 : ipv4 and ipv6 dual stack
+* ipv6 : ipv4 and ipv6 dual stack
