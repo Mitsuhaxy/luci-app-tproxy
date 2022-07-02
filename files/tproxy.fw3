@@ -76,12 +76,12 @@ function add_ipv4_set() {
 
     while ! ping -c 1 119.29.29.29 >/dev/null; do sleep 1; done
 
-    if [ -z "$(ipset --list | grep 'Name: gateway4')" ]; then
-        ipset create gateway4 hash:net family inet hashsize 1024
-        ipset add gateway4 $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')
+    if [ -z "$(ipset --list | grep 'Name: wan4')" ]; then
+        ipset create wan4 hash:net family inet hashsize 1024
+        ipset add wan4 $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')
     else
-        ipset flush gateway4
-        ipset add gateway4 $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')
+        ipset flush wan4
+        ipset add wan4 $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')
     fi
 }
 function add_ipv6_set() {
@@ -109,12 +109,12 @@ function add_ipv6_set() {
 
     while ! ping -c 1 119.29.29.29 >/dev/null; do sleep 1; done
 
-    if [ -z "$(ipset --list | grep 'Name: gateway4')" ]; then
-        ipset create gateway4 hash:net family inet hashsize 1024
-        ipset add gateway4 $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')
+    if [ -z "$(ipset --list | grep 'Name: wan4')" ]; then
+        ipset create wan4 hash:net family inet hashsize 1024
+        ipset add wan4 $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')
     else
-        ipset flush gateway4
-        ipset add gateway4 $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')
+        ipset flush wan4
+        ipset add wan4 $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')
     fi
 
     if [ -z "$(ipset --list | grep 'Name: lan6')" ]; then
@@ -143,12 +143,12 @@ function add_ipv6_set() {
 
     while ! ping6 -c 1 2402:4e00:: >/dev/null; do sleep 1; done
 
-    if [ -z "$(ipset --list | grep 'Name: gateway6')" ]; then
-        ipset create gateway6 hash:net family inet6 hashsize 1024
-        ipset add gateway6 $(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].assigned.lan.address')/$(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].assigned.lan.mask')
+    if [ -z "$(ipset --list | grep 'Name: wan6')" ]; then
+        ipset create wan6 hash:net family inet6 hashsize 1024
+        ipset add wan6 $(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].address')/$(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].mask')
     else
-        ipset flush gateway6
-        ipset add gateway6 $(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].assigned.lan.address')/$(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].assigned.lan.mask')
+        ipset flush wan6
+        ipset add wan6 $(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].address')/$(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].mask')
     fi
 }
 
@@ -156,24 +156,24 @@ function add_ipv6_set() {
 function reload_ipv4_set() {
     while ! ping -c 1 119.29.29.29 >/dev/null; do sleep 1; done
 
-    if [ -n "$(ipset --list | grep 'Name: gateway4')" ]; then
-        ipset flush gateway4
-        ipset add gateway4 $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')
+    if [ -n "$(ipset --list | grep 'Name: wan4')" ]; then
+        ipset flush wan4
+        ipset add wan4 $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')
     fi
 }
 function reload_ipv6_set() {
     while ! ping -c 1 119.29.29.29 >/dev/null; do sleep 1; done
 
-    if [ -n "$(ipset --list | grep 'Name: gateway4')" ]; then
-        ipset flush gateway4
-        ipset add gateway4 $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')
+    if [ -n "$(ipset --list | grep 'Name: wan4')" ]; then
+        ipset flush wan4
+        ipset add wan4 $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')
     fi
 
     while ! ping6 -c 1 2402:4e00:: >/dev/null; do sleep 1; done
 
-    if [ -n "$(ipset --list | grep 'Name: gateway6')" ]; then
-        ipset flush gateway6
-        ipset add gateway6 $(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].assigned.lan.address')/$(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].assigned.lan.mask')
+    if [ -n "$(ipset --list | grep 'Name: wan6')" ]; then
+        ipset flush wan6
+        ipset add wan6 $(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].address')/$(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].mask')
     fi
 }
 
@@ -183,8 +183,8 @@ function del_ipv4_set() {
         ipset destroy lan4
     fi
 
-    if [ -n "$(ipset --list | grep 'Name: gateway4')" ]; then
-        ipset destroy gateway4
+    if [ -n "$(ipset --list | grep 'Name: wan4')" ]; then
+        ipset destroy wan4
     fi
 }
 function del_ipv6_set() {
@@ -192,16 +192,16 @@ function del_ipv6_set() {
         ipset destroy lan4
     fi
 
-    if [ -n "$(ipset --list | grep 'Name: gateway4')" ]; then
-        ipset destroy gateway4
+    if [ -n "$(ipset --list | grep 'Name: wan4')" ]; then
+        ipset destroy wan4
     fi
 
     if [ -n "$(ipset --list | grep 'Name: lan6')" ]; then
         ipset destroy lan6
     fi
 
-    if [ -n "$(ipset --list | grep 'Name: gateway6')" ]; then
-        ipset destroy gateway6
+    if [ -n "$(ipset --list | grep 'Name: wan6')" ]; then
+        ipset destroy wan6
     fi
 }
 
@@ -209,11 +209,11 @@ function del_ipv6_set() {
 function enable_ipv4_tproxy() {
     if [ -z "$(iptables --list -t mangle | grep 'TPROXY')" ]; then
         iptables -t mangle -A PREROUTING -m set --match-set lan4 dst -j RETURN
-        iptables -t mangle -A PREROUTING -m set --match-set gateway4 dst -j RETURN
+        iptables -t mangle -A PREROUTING -m set --match-set wan4 dst -j RETURN
         iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
         iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
         iptables -t mangle -A OUTPUT -m set --match-set lan4 dst -j RETURN
-        iptables -t mangle -A OUTPUT -m set --match-set gateway4 dst -j RETURN
+        iptables -t mangle -A OUTPUT -m set --match-set wan4 dst -j RETURN
         iptables -t mangle -A OUTPUT -m mark --mark 0xff/0xffffffff -j RETURN
         iptables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xfe/0xffffffff
         iptables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xfe/0xffffffff
@@ -222,11 +222,11 @@ function enable_ipv4_tproxy() {
 function enable_ipv6_tproxy() {
     if [ -z "$(iptables --list -t mangle | grep 'TPROXY')" ]; then
         iptables -t mangle -A PREROUTING -m set --match-set lan4 dst -j RETURN
-        iptables -t mangle -A PREROUTING -m set --match-set gateway4 dst -j RETURN
+        iptables -t mangle -A PREROUTING -m set --match-set wan4 dst -j RETURN
         iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
         iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
         iptables -t mangle -A OUTPUT -m set --match-set lan4 dst -j RETURN
-        iptables -t mangle -A OUTPUT -m set --match-set gateway4 dst -j RETURN
+        iptables -t mangle -A OUTPUT -m set --match-set wan4 dst -j RETURN
         iptables -t mangle -A OUTPUT -m mark --mark 0xff/0xffffffff -j RETURN
         iptables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xfe/0xffffffff
         iptables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xfe/0xffffffff
@@ -234,11 +234,11 @@ function enable_ipv6_tproxy() {
 
     if [ -z "$(ip6tables --list -t mangle | grep 'TPROXY')" ]; then
         ip6tables -t mangle -A PREROUTING -m set --match-set lan6 dst -j RETURN
-        ip6tables -t mangle -A PREROUTING -m set --match-set gateway6 dst -j RETURN
+        ip6tables -t mangle -A PREROUTING -m set --match-set wan6 dst -j RETURN
         ip6tables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip ::1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
         ip6tables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip ::1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
         ip6tables -t mangle -A OUTPUT -m set --match-set lan6 dst -j RETURN
-        ip6tables -t mangle -A OUTPUT -m set --match-set gateway6 dst -j RETURN
+        ip6tables -t mangle -A OUTPUT -m set --match-set wan6 dst -j RETURN
         ip6tables -t mangle -A OUTPUT -m mark --mark 0xff/0xffffffff -j RETURN
         ip6tables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xfe/0xffffffff
         ip6tables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xfe/0xffffffff
