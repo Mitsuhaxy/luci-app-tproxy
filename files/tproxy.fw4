@@ -157,7 +157,7 @@ function del_ipv6_set() {
     fi
 
     if [ -n "$(nft list table inet fw4 | grep 'set wan6')" ]; then
-        nft delete set inet fw4 wan4
+        nft delete set inet fw4 wan6
     fi
 }
 
