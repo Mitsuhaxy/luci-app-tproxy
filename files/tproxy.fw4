@@ -163,50 +163,26 @@ function del_ipv6_set() {
 
 #enable_tproxy
 function enable_ipv4_tproxy() {
-    if [ -z "$(iptables --list -t mangle | grep 'TPROXY')" ]; then
-        iptables -t mangle -A PREROUTING -m set --match-set lan4 dst -j RETURN
-        iptables -t mangle -A PREROUTING -m set --match-set wan4 dst -j RETURN
-        iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
-        iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
-        iptables -t mangle -A OUTPUT -m set --match-set lan4 dst -j RETURN
-        iptables -t mangle -A OUTPUT -m set --match-set wan4 dst -j RETURN
-        iptables -t mangle -A OUTPUT -m mark --mark 0xff/0xffffffff -j RETURN
-        iptables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xfe/0xffffffff
-        iptables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xfe/0xffffffff
+    if [ -z "$(nft list table inet fw4 | grep 'TPROXY')" ]; then
+        #TODO: nft tproxy
     fi
 }
 function enable_ipv6_tproxy() {
-    if [ -z "$(iptables --list -t mangle | grep 'TPROXY')" ]; then
-        iptables -t mangle -A PREROUTING -m set --match-set lan4 dst -j RETURN
-        iptables -t mangle -A PREROUTING -m set --match-set wan4 dst -j RETURN
-        iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
-        iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
-        iptables -t mangle -A OUTPUT -m set --match-set lan4 dst -j RETURN
-        iptables -t mangle -A OUTPUT -m set --match-set wan4 dst -j RETURN
-        iptables -t mangle -A OUTPUT -m mark --mark 0xff/0xffffffff -j RETURN
-        iptables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xfe/0xffffffff
-        iptables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xfe/0xffffffff
+    if [ -z "$(nft list table inet fw4 | grep 'TPROXY')" ]; then
+        #TODO: nft tproxy
     fi
 
-    if [ -z "$(ip6tables --list -t mangle | grep 'TPROXY')" ]; then
-        ip6tables -t mangle -A PREROUTING -m set --match-set lan6 dst -j RETURN
-        ip6tables -t mangle -A PREROUTING -m set --match-set wan6 dst -j RETURN
-        ip6tables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip ::1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
-        ip6tables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip ::1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
-        ip6tables -t mangle -A OUTPUT -m set --match-set lan6 dst -j RETURN
-        ip6tables -t mangle -A OUTPUT -m set --match-set wan6 dst -j RETURN
-        ip6tables -t mangle -A OUTPUT -m mark --mark 0xff/0xffffffff -j RETURN
-        ip6tables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xfe/0xffffffff
-        ip6tables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xfe/0xffffffff
+    if [ -z "$(nft list table inet fw4 | grep 'TPROXY')" ]; then
+        #TODO: nft tproxy
     fi
 }
 
 #disable_tproxy
 function disable_ipv4_tproxy() {
-    /etc/init.d/firewall restart
+    nft flush chain inet fw4 mangle_prerouting
 }
 function disable_ipv6_tproxy() {
-    /etc/init.d/firewall restart
+    nft flush chain inet fw4 mangle_prerouting
 }
 
 #start_service
