@@ -101,10 +101,10 @@ function add_ipv6_set() {
 
     if [ -z "$(nft list table inet fw4 | grep 'set wan6')" ]; then
         nft add set inet fw4 wan6 { type ipv6_addr\; flags interval\; }
-        nft add element inet fw4 lan6 { $(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].address')/$(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].mask') }
+        nft add element inet fw4 wan6 { $(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].address')/$(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].mask') }
     else
         nft flush set inet fw4 wan6
-        nft add element inet fw4 lan6 { $(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].address')/$(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].mask') }
+        nft add element inet fw4 wan6 { $(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].address')/$(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].mask') }
     fi
 }
 
@@ -180,9 +180,11 @@ function enable_ipv6_tproxy() {
 #disable_tproxy
 function disable_ipv4_tproxy() {
     nft flush chain inet fw4 mangle_prerouting
+    nft flush chain inet fw4 mangle_output
 }
 function disable_ipv6_tproxy() {
     nft flush chain inet fw4 mangle_prerouting
+    nft flush chain inet fw4 mangle_output
 }
 
 #start_service
