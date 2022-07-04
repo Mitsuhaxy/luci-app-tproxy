@@ -67,7 +67,7 @@ function add_ipv4_set() {
         nft add element inet fw4 wan4 { $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask') }
     else
         nft flush set inet fw4 wan4
-        nft add element inet fw4 wan4 { $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')}
+        nft add element inet fw4 wan4 { $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask') }
     fi
 }
 function add_ipv6_set() {
@@ -86,7 +86,7 @@ function add_ipv6_set() {
         nft add element inet fw4 wan4 { $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask') }
     else
         nft flush set inet fw4 wan4
-        nft add element inet fw4 wan4 { $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')}
+        nft add element inet fw4 wan4 { $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask') }
     fi
 
     if [ -z "$(nft list table inet fw4 | grep 'set lan6')" ]; then
@@ -112,52 +112,52 @@ function add_ipv6_set() {
 function reload_ipv4_set() {
     while ! ping -c 1 119.29.29.29 >/dev/null; do sleep 1; done
 
-    if [ -n "$(ipset --list | grep 'set wan4')" ]; then
+    if [ -n "$(nft list table inet fw4 | grep 'set wan4')" ]; then
         nft flush set inet fw4 wan4
-        nft add element inet fw4 wan4 { $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')}
+        nft add element inet fw4 wan4 { $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask') }
     fi
 }
 function reload_ipv6_set() {
     while ! ping -c 1 119.29.29.29 >/dev/null; do sleep 1; done
 
-    if [ -n "$(ipset --list | grep 'Name: wan4')" ]; then
+    if [ -n "$(nft list table inet fw4 | grep 'set wan4')" ]; then
         nft flush set inet fw4 wan4
-        nft add element inet fw4 wan4 { $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')}
+        nft add element inet fw4 wan4 { $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask') }
     fi
 
     while ! ping6 -c 1 2402:4e00:: >/dev/null; do sleep 1; done
 
-    if [ -n "$(ipset --list | grep 'Name: wan6')" ]; then
+    if [ -n "$(nft list table inet fw4 | grep 'set wan6')" ]; then
         nft flush set inet fw4 wan6
-        nft add element inet fw4 lan6 { $(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].address')/$(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].mask') }
+        nft add element inet fw4 wan6 { $(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].address')/$(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].mask') }
     fi
 }
 
 #del_set
 function del_ipv4_set() {
-    if [ -n "$(ipset --list | grep 'Name: lan4')" ]; then
-        ipset destroy lan4
+    if [ -n "$(nft list table inet fw4 | grep 'set lan4')" ]; then
+        nft delete set inet fw4 lan4
     fi
 
-    if [ -n "$(ipset --list | grep 'Name: wan4')" ]; then
-        ipset destroy wan4
+    if [ -n "$(nft list table inet fw4 | grep 'set wan4')" ]; then
+        nft delete set inet fw4 wan4
     fi
 }
 function del_ipv6_set() {
-    if [ -n "$(ipset --list | grep 'Name: lan4')" ]; then
-        ipset destroy lan4
+    if [ -n "$(nft list table inet fw4 | grep 'set lan4')" ]; then
+        nft delete set inet fw4 lan4
     fi
 
-    if [ -n "$(ipset --list | grep 'Name: wan4')" ]; then
-        ipset destroy wan4
+    if [ -n "$(nft list table inet fw4 | grep 'set wan4')" ]; then
+        nft delete set inet fw4 wan4
     fi
 
-    if [ -n "$(ipset --list | grep 'Name: lan6')" ]; then
-        ipset destroy lan6
+    if [ -n "$(nft list table inet fw4 | grep 'set lan6')" ]; then
+        nft delete set inet fw4 lan6
     fi
 
-    if [ -n "$(ipset --list | grep 'Name: wan6')" ]; then
-        ipset destroy wan6
+    if [ -n "$(nft list table inet fw4 | grep 'set wan6')" ]; then
+        nft delete set inet fw4 wan4
     fi
 }
 
