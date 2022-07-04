@@ -2,124 +2,203 @@
 
 #add_rule
 function add_ipv4_rule() {
-    ip route add local default dev lo table 100
-    ip rule add fwmark 254 table 100
+    if [ -z "$(ip route list table 100 | grep 'local default dev lo scope host')" ]; then
+        ip route add local default dev lo table 100
+    fi
+    if [ -z "$(ip rule | grep 'from all fwmark 0xfe lookup 100')" ]; then
+        ip rule add fwmark 254 table 100
+    fi
 }
 function add_ipv6_rule() {
-    ip -6 route add local default dev lo table 100
-    ip -6 rule add fwmark 254 table 100
-}
-function add_ipv4v6_rule() {
-    add_ipv4_rule
-    add_ipv6_rule
+    if [ -z "$(ip route list table 100 | grep 'local default dev lo scope host')" ]; then
+        ip route add local default dev lo table 100
+    fi
+    if [ -z "$(ip rule | grep 'from all fwmark 0xfe lookup 100')" ]; then
+        ip rule add fwmark 254 table 100
+    fi
+
+    if [ -z "$(ip -6 route list table 100 | grep 'local default dev lo metric 1024 pref medium')" ]; then
+        ip -6 route add local default dev lo table 100
+    fi
+    if [ -z "$(ip -6 rule | grep 'from all fwmark 0xfe lookup 100')" ]; then
+        ip -6 rule add fwmark 254 table 100
+    fi
 }
 
 #del_rule
 function del_ipv4_rule() {
-    ip route del local default dev lo table 100
-    ip rule del fwmark 254 table 100
+    if [ -n "$(ip route list table 100 | grep 'local default dev lo scope host')" ]; then
+        ip route del local default dev lo table 100
+    fi
+    if [ -n "$(ip rule | grep 'from all fwmark 0xfe lookup 100')" ]; then
+        ip rule del fwmark 254 table 100
+    fi
 }
 function del_ipv6_rule() {
-    ip -6 route del local default dev lo table 100
-    ip -6 rule del fwmark 254 table 100
-}
-function del_ipv4v6_rule() {
-    del_ipv4_rule
-    del_ipv6_rule
+    if [ -n "$(ip route list table 100 | grep 'local default dev lo scope host')" ]; then
+        ip route del local default dev lo table 100
+    fi
+    if [ -n "$(ip rule | grep 'from all fwmark 0xfe lookup 100')" ]; then
+        ip rule del fwmark 254 table 100
+    fi
+
+    if [ -n "$(ip -6 route list table 100 | grep 'local default dev lo metric 1024 pref medium')" ]; then
+        ip -6 route del local default dev lo table 100
+    fi
+    if [ -n "$(ip -6 rule | grep 'from all fwmark 0xfe lookup 100')" ]; then
+        ip -6 rule del fwmark 254 table 100
+    fi
 }
 
 #add_set
 function add_ipv4_set() {
-    ipset create lan4 hash:net family inet hashsize 1024
-    ipset add lan4 10.0.0.0/8
-    ipset add lan4 100.64.0.0/10
-    ipset add lan4 127.0.0.0/8
-    ipset add lan4 169.254.0.0/16
-    ipset add lan4 172.16.0.0/12
-    ipset add lan4 192.168.0.0/16
-    ipset add lan4 224.0.0.0/3
-    ipset add lan4 255.255.255.255/32
-    while ! ping -c 2 119.29.29.29; do sleep 1; done
-    ipset create gateway4 hash:net family inet hashsize 1024
-    ipset add gateway4 $(ip address show pppoe-wan | grep '/32' | awk '{print $2}' | head -n 1)
+    if [ -z "$(nft list table inet fw4 | grep 'set lan4')" ]; then
+        nft add set inet fw4 lan4 { type ipv4_addr\; flags interval\; }
+        nft add element inet fw4 lan4 { 0.0.0.0/8, 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 172.16.0.0/12, 169.254.0.0/16, 192.0.0.0/24, 192.88.99.0/24, 192.168.0.0/16, 223.0.0.0/3 }
+    else
+        nft flush set inet fw4 lan4
+        nft add element inet fw4 lan4 { 0.0.0.0/8, 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 172.16.0.0/12, 169.254.0.0/16, 192.0.0.0/24, 192.88.99.0/24, 192.168.0.0/16, 223.0.0.0/3 }
+    fi
+
+    while ! ping -c 1 119.29.29.29 >/dev/null; do sleep 1; done
+
+    if [ -z "$(nft list table inet fw4 | grep 'set wan4')" ]; then
+        nft add set inet fw4 wan4 { type ipv4_addr\; flags interval\; }
+        nft add element inet fw4 wan4 { $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask') }
+    else
+        nft flush set inet fw4 wan4
+        nft add element inet fw4 wan4 { $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')}
+    fi
 }
 function add_ipv6_set() {
-    ipset create lan6 hash:net family inet6 hashsize 1024
-    ipset add lan6 ::/128
-    ipset add lan6 ::1/128
-    ipset add lan6 ::ffff:0:0/96
-    ipset add lan6 ::ffff:0:0:0/96
-    ipset add lan6 64:ff9b::/96
-    ipset add lan6 100::/64
-    ipset add lan6 fc00::/7
-    ipset add lan6 fe80::/10
-    ipset add lan6 ff00::/8
-    while ! ping6 -c 2 2402:4e00::; do sleep 1; done
-    ipset create gateway6 hash:net family inet6 hashsize 1024
-    ipset add gateway6 $(ip address show br-lan | grep '/60' | awk '{print $2}' | head -n 1)
-}
-function add_ipv4v6_set() {
-    add_ipv4_set
-    add_ipv6_set
+    if [ -z "$(nft list table inet fw4 | grep 'set lan4')" ]; then
+        nft add set inet fw4 lan4 { type ipv4_addr\; flags interval\; }
+        nft add element inet fw4 lan4 { 0.0.0.0/8, 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 172.16.0.0/12, 169.254.0.0/16, 192.0.0.0/24, 192.88.99.0/24, 192.168.0.0/16, 223.0.0.0/3 }
+    else
+        nft flush set inet fw4 lan4
+        nft add element inet fw4 lan4 { 0.0.0.0/8, 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 172.16.0.0/12, 169.254.0.0/16, 192.0.0.0/24, 192.88.99.0/24, 192.168.0.0/16, 223.0.0.0/3 }
+    fi
+
+    while ! ping -c 1 119.29.29.29 >/dev/null; do sleep 1; done
+
+    if [ -z "$(nft list table inet fw4 | grep 'set wan4')" ]; then
+        nft add set inet fw4 wan4 { type ipv4_addr\; flags interval\; }
+        nft add element inet fw4 wan4 { $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask') }
+    else
+        nft flush set inet fw4 wan4
+        nft add element inet fw4 wan4 { $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')}
+    fi
+
+    if [ -z "$(nft list table inet fw4 | grep 'set lan6')" ]; then
+        nft add set inet fw4 lan6 { type ipv6_addr\; flags interval\; }
+        nft add element inet fw4 lan6 { ::, ::1, ::ffff:0:0:0/96, 64:ff9b::/96, 100::/64, 2001::/32, 2001:20::/28, 2001:db8::/32, 2002::/16, fc00::/7, fe80::/10, ff00::/8 }
+    else
+        nft flush set inet fw4 lan6
+        nft add element inet fw4 lan6 { ::, ::1, ::ffff:0:0:0/96, 64:ff9b::/96, 100::/64, 2001::/32, 2001:20::/28, 2001:db8::/32, 2002::/16, fc00::/7, fe80::/10, ff00::/8 }
+    fi
+
+    while ! ping6 -c 1 2402:4e00:: >/dev/null; do sleep 1; done
+
+    if [ -z "$(nft list table inet fw4 | grep 'set wan6')" ]; then
+        nft add set inet fw4 wan6 { type ipv6_addr\; flags interval\; }
+        nft add element inet fw4 lan6 { $(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].address')/$(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].mask') }
+    else
+        nft flush set inet fw4 wan6
+        nft add element inet fw4 lan6 { $(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].address')/$(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].mask') }
+    fi
 }
 
 #reload_set
 function reload_ipv4_set() {
-    ipset flush gateway4
-    while ! ping -c 2 119.29.29.29; do sleep 1; done
-    ipset add gateway4 $(ip address show pppoe-wan | grep '/32' | awk '{print $2}' | head -n 1)
+    while ! ping -c 1 119.29.29.29 >/dev/null; do sleep 1; done
 
+    if [ -n "$(ipset --list | grep 'set wan4')" ]; then
+        nft flush set inet fw4 wan4
+        nft add element inet fw4 wan4 { $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')}
+    fi
 }
 function reload_ipv6_set() {
-    ipset flush gateway6
-    while ! ping6 -c 2 2402:4e00::; do sleep 1; done
-    ipset add gateway6 $(ip address show br-lan | grep '/60' | awk '{print $2}' | head -n 1)
-}
-function reload_ipv4v6_set() {
-    reload_ipv4_set
-    reload_ipv6_set
+    while ! ping -c 1 119.29.29.29 >/dev/null; do sleep 1; done
+
+    if [ -n "$(ipset --list | grep 'Name: wan4')" ]; then
+        nft flush set inet fw4 wan4
+        nft add element inet fw4 wan4 { $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')}
+    fi
+
+    while ! ping6 -c 1 2402:4e00:: >/dev/null; do sleep 1; done
+
+    if [ -n "$(ipset --list | grep 'Name: wan6')" ]; then
+        nft flush set inet fw4 wan6
+        nft add element inet fw4 lan6 { $(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].address')/$(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].mask') }
+    fi
 }
 
 #del_set
 function del_ipv4_set() {
-    ipset destroy lan4
-    ipset destroy gateway4
+    if [ -n "$(ipset --list | grep 'Name: lan4')" ]; then
+        ipset destroy lan4
+    fi
+
+    if [ -n "$(ipset --list | grep 'Name: wan4')" ]; then
+        ipset destroy wan4
+    fi
 }
 function del_ipv6_set() {
-    ipset destroy lan6
-    ipset destroy gateway6
-}
-function del_ipv4v6_set() {
-    del_ipv4_set
-    del_ipv6_set
+    if [ -n "$(ipset --list | grep 'Name: lan4')" ]; then
+        ipset destroy lan4
+    fi
+
+    if [ -n "$(ipset --list | grep 'Name: wan4')" ]; then
+        ipset destroy wan4
+    fi
+
+    if [ -n "$(ipset --list | grep 'Name: lan6')" ]; then
+        ipset destroy lan6
+    fi
+
+    if [ -n "$(ipset --list | grep 'Name: wan6')" ]; then
+        ipset destroy wan6
+    fi
 }
 
 #enable_tproxy
 function enable_ipv4_tproxy() {
-    iptables -t mangle -A PREROUTING -m set --match-set lan4 dst -j RETURN
-    iptables -t mangle -A PREROUTING -m set --match-set gateway4 dst -j RETURN
-    iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
-    iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
-    iptables -t mangle -A OUTPUT -m set --match-set lan4 dst -j RETURN
-    iptables -t mangle -A OUTPUT -m set --match-set gateway4 dst -j RETURN
-    iptables -t mangle -A OUTPUT -m mark --mark 0xff/0xffffffff -j RETURN
-    iptables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xfe/0xffffffff
-    iptables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xfe/0xffffffff
+    if [ -z "$(iptables --list -t mangle | grep 'TPROXY')" ]; then
+        iptables -t mangle -A PREROUTING -m set --match-set lan4 dst -j RETURN
+        iptables -t mangle -A PREROUTING -m set --match-set wan4 dst -j RETURN
+        iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
+        iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
+        iptables -t mangle -A OUTPUT -m set --match-set lan4 dst -j RETURN
+        iptables -t mangle -A OUTPUT -m set --match-set wan4 dst -j RETURN
+        iptables -t mangle -A OUTPUT -m mark --mark 0xff/0xffffffff -j RETURN
+        iptables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xfe/0xffffffff
+        iptables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xfe/0xffffffff
+    fi
 }
 function enable_ipv6_tproxy() {
-    ip6tables -t mangle -A PREROUTING -m set --match-set lan6 dst -j RETURN
-    ip6tables -t mangle -A PREROUTING -m set --match-set gateway6 dst -j RETURN
-    ip6tables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip ::1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
-    ip6tables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip ::1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
-    ip6tables -t mangle -A OUTPUT -m set --match-set lan6 dst -j RETURN
-    ip6tables -t mangle -A OUTPUT -m set --match-set gateway6 dst -j RETURN
-    ip6tables -t mangle -A OUTPUT -m mark --mark 0xff/0xffffffff -j RETURN
-    ip6tables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xfe/0xffffffff
-    ip6tables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xfe/0xffffffff
-}
-function enable_ipv4v6_tproxy() {
-    enable_ipv4_tproxy
-    enable_ipv6_tproxy
+    if [ -z "$(iptables --list -t mangle | grep 'TPROXY')" ]; then
+        iptables -t mangle -A PREROUTING -m set --match-set lan4 dst -j RETURN
+        iptables -t mangle -A PREROUTING -m set --match-set wan4 dst -j RETURN
+        iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
+        iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
+        iptables -t mangle -A OUTPUT -m set --match-set lan4 dst -j RETURN
+        iptables -t mangle -A OUTPUT -m set --match-set wan4 dst -j RETURN
+        iptables -t mangle -A OUTPUT -m mark --mark 0xff/0xffffffff -j RETURN
+        iptables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xfe/0xffffffff
+        iptables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xfe/0xffffffff
+    fi
+
+    if [ -z "$(ip6tables --list -t mangle | grep 'TPROXY')" ]; then
+        ip6tables -t mangle -A PREROUTING -m set --match-set lan6 dst -j RETURN
+        ip6tables -t mangle -A PREROUTING -m set --match-set wan6 dst -j RETURN
+        ip6tables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip ::1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
+        ip6tables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip ::1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
+        ip6tables -t mangle -A OUTPUT -m set --match-set lan6 dst -j RETURN
+        ip6tables -t mangle -A OUTPUT -m set --match-set wan6 dst -j RETURN
+        ip6tables -t mangle -A OUTPUT -m mark --mark 0xff/0xffffffff -j RETURN
+        ip6tables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xfe/0xffffffff
+        ip6tables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xfe/0xffffffff
+    fi
 }
 
 #disable_tproxy
@@ -127,9 +206,6 @@ function disable_ipv4_tproxy() {
     /etc/init.d/firewall restart
 }
 function disable_ipv6_tproxy() {
-    /etc/init.d/firewall restart
-}
-function disable_ipv4v6_tproxy() {
     /etc/init.d/firewall restart
 }
 
@@ -144,11 +220,6 @@ function start_ipv6_service() {
     add_ipv6_set
     enable_ipv6_tproxy
 }
-function start_ipv4v6_service() {
-    add_ipv4v6_rule
-    add_ipv4v6_set
-    enable_ipv4v6_tproxy
-}
 
 #stop_service
 function stop_ipv4_service() {
@@ -160,11 +231,6 @@ function stop_ipv6_service() {
     disable_ipv6_tproxy
     del_ipv6_rule
     del_ipv6_set
-}
-function stop_ipv4v6_service() {
-    disable_ipv4v6_tproxy
-    del_ipv4v6_rule
-    del_ipv4v6_set
 }
 
 #restart_service
@@ -183,12 +249,4 @@ function restart_ipv6_service() {
     add_ipv6_rule
     add_ipv6_set
     enable_ipv6_tproxy
-}
-function restart_ipv4v6_service() {
-    disable_ipv4v6_tproxy
-    del_ipv4v6_rule
-    del_ipv4v6_set
-    add_ipv4v6_rule
-    add_ipv4v6_set
-    enable_ipv4v6_tproxy
 }
