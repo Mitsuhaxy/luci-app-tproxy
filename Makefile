@@ -15,7 +15,7 @@ define Package/tproxy
 	SECTION:=Custom
 	CATEGORY:=Extra packages
 	TITLE:=TProxy for openwrt
-	DEPENDS:=+luci-base +PACKAGE_firewall4:kmod-nft-tproxy +PACKAGE_firewall:ipset +PACKAGE_firewall:kmod-ipt-tproxy +PACKAGE_firewall:iptables +PACKAGE_firewall:iptables-mod-tproxy
+	DEPENDS:=+luci-base +ip-full +PACKAGE_firewall4:kmod-nft-tproxy +PACKAGE_firewall:ipset +PACKAGE_firewall:kmod-ipt-tproxy +PACKAGE_firewall:iptables +PACKAGE_firewall:iptables-mod-tproxy
 	PKGARCH:=all
 endef
 
