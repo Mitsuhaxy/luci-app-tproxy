@@ -1,0 +1,17 @@
+{
+    "admin/network/tproxy": {
+        "title": "tproxy",
+        "action": {
+            "type": "view",
+            "path": "network/tproxy"
+        },
+        "depends": {
+            "acl": [
+                "luci-app-tproxy"
+            ],
+            "uci": {
+                "tproxy": true
+            }
+        }
+    }
+}
