@@ -240,8 +240,8 @@ function enable_ipv6_tproxy() {
         ip6tables -t mangle -A OUTPUT -m set --match-set lan6 dst -j RETURN
         ip6tables -t mangle -A OUTPUT -m set --match-set wan6 dst -j RETURN
         ip6tables -t mangle -A OUTPUT -m mark --mark "$MARK"/0xffffffff -j RETURN
-        ip6tables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xfe/0xffff
-        ip6tables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xfe/0xffff
+        ip6tables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xffff
+        ip6tables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xffff
     fi
 }
 
