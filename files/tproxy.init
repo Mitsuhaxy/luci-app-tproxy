@@ -19,6 +19,17 @@ start_service() {
     fi
 }
 
+stop_service() {
+    stop_all_service
+}
+
+restart_server() {
+    stop_all_service
+    if [ "$enabled" = "enabled" ]; then
+        start_"$mode"_service
+    fi
+}
+
 reload_service() {
     stop_all_service
     if [ "$enabled" = "enabled" ]; then
