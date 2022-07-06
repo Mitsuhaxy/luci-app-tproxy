@@ -1,0 +1,15 @@
+{
+    "luci-app-tproxy": {
+        "description": "Grant access to tproxy configuration",
+        "read": {
+            "uci": [
+                "tproxy"
+            ]
+        },
+        "write": {
+            "uci": [
+                "tproxy"
+            ]
+        }
+    }
+}

@@ -3,30 +3,36 @@
 START=99
 STOP=1
 USE_PROCD=1
+
 NAME=tproxy
 
 source /usr/bin/tproxy
 
-MODE=$(uci get tproxy.options.mode)
-PORT=$(uci get tproxy.options.port)
-MARK=$(uci get tproxy.options.mark)
+enabled=$(uci get tproxy.@general[0].enabled)
+mode=$(uci get tproxy.@general[0].mode)
+port=$(uci get tproxy.@general[0].port)
+mark=$(uci get tproxy.@general[0].mark)
 
 start_service() {
-    start_"$MODE"_service
+    if [ "$enabled" -eq "0" ]; then
+        exit 1
+    fi
+    start_"$mode"_service
 }
 
 stop_service() {
-    stop_"$MODE"_service
+    stop_all_service
 }
 
 restart_service() {
-    restart_"$MODE"_service
+    restart_"$mode"_service
 }
 
 reload_service() {
-    reload_"$MODE"_set
+    restart_"$mode"_service
 }
 
 service_triggers() {
+    procd_add_reload_trigger tproxy
     procd_add_interface_trigger "interface.*.up" "wan" /etc/init.d/tproxy reload
 }
