@@ -6,7 +6,7 @@ function add_ipv4_rule() {
         ip route add local default dev lo table 65535
     fi
     if [ -z "$(ip rule | grep 'from all fwmark 0xffff lookup 65535')" ]; then
-        ip rule add fwmark 254 table 65535
+        ip rule add fwmark 0xffff table 65535
     fi
 }
 function add_ipv6_rule() {
@@ -14,14 +14,14 @@ function add_ipv6_rule() {
         ip route add local default dev lo table 65535
     fi
     if [ -z "$(ip rule | grep 'from all fwmark 0xffff lookup 65535')" ]; then
-        ip rule add fwmark 254 table 65535
+        ip rule add fwmark 0xffff table 65535
     fi
 
     if [ -z "$(ip -6 route list table 65535 | grep 'local default dev lo metric 1024 pref medium')" ]; then
         ip -6 route add local default dev lo table 65535
     fi
     if [ -z "$(ip -6 rule | grep 'from all fwmark 0xffff lookup 65535')" ]; then
-        ip -6 rule add fwmark 254 table 65535
+        ip -6 rule add fwmark 0xffff table 65535
     fi
 }
 
@@ -31,7 +31,7 @@ function del_ipv4_rule() {
         ip route del local default dev lo table 65535
     fi
     if [ -n "$(ip rule | grep 'from all fwmark 0xffff lookup 65535')" ]; then
-        ip rule del fwmark 254 table 65535
+        ip rule del fwmark 0xffff table 65535
     fi
 }
 function del_ipv6_rule() {
@@ -39,14 +39,14 @@ function del_ipv6_rule() {
         ip route del local default dev lo table 65535
     fi
     if [ -n "$(ip rule | grep 'from all fwmark 0xffff lookup 65535')" ]; then
-        ip rule del fwmark 254 table 65535
+        ip rule del fwmark 0xffff table 65535
     fi
 
     if [ -n "$(ip -6 route list table 65535 | grep 'local default dev lo metric 1024 pref medium')" ]; then
         ip -6 route del local default dev lo table 65535
     fi
     if [ -n "$(ip -6 rule | grep 'from all fwmark 0xffff lookup 65535')" ]; then
-        ip -6 rule del fwmark 254 table 65535
+        ip -6 rule del fwmark 0xffff table 65535
     fi
 }
 
