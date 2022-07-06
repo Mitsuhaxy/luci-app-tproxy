@@ -8,6 +8,8 @@ NAME=tproxy
 source /usr/bin/tproxy
 
 MODE=$(uci get tproxy.options.mode)
+PORT=$(uci get tproxy.options.port)
+MARK=$(uci get tproxy.options.mark)
 
 start_service() {
     start_"$MODE"_service

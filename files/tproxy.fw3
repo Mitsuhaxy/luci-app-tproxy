@@ -2,51 +2,51 @@
 
 #add_rule
 function add_ipv4_rule() {
-    if [ -z "$(ip route list table 100 | grep 'local default dev lo scope host')" ]; then
-        ip route add local default dev lo table 100
+    if [ -z "$(ip route list table 65535 | grep 'local default dev lo scope host')" ]; then
+        ip route add local default dev lo table 65535
     fi
-    if [ -z "$(ip rule | grep 'from all fwmark 0xfe lookup 100')" ]; then
-        ip rule add fwmark 254 table 100
+    if [ -z "$(ip rule | grep 'from all fwmark 0xffff lookup 65535')" ]; then
+        ip rule add fwmark 0xffff table 65535
     fi
 }
 function add_ipv6_rule() {
-    if [ -z "$(ip route list table 100 | grep 'local default dev lo scope host')" ]; then
-        ip route add local default dev lo table 100
+    if [ -z "$(ip route list table 65535 | grep 'local default dev lo scope host')" ]; then
+        ip route add local default dev lo table 65535
     fi
-    if [ -z "$(ip rule | grep 'from all fwmark 0xfe lookup 100')" ]; then
-        ip rule add fwmark 254 table 100
+    if [ -z "$(ip rule | grep 'from all fwmark 0xffff lookup 65535')" ]; then
+        ip rule add fwmark 0xffff table 65535
     fi
 
-    if [ -z "$(ip -6 route list table 100 | grep 'local default dev lo metric 1024 pref medium')" ]; then
-        ip -6 route add local default dev lo table 100
+    if [ -z "$(ip -6 route list table 65535 | grep 'local default dev lo metric 1024 pref medium')" ]; then
+        ip -6 route add local default dev lo table 65535
     fi
-    if [ -z "$(ip -6 rule | grep 'from all fwmark 0xfe lookup 100')" ]; then
-        ip -6 rule add fwmark 254 table 100
+    if [ -z "$(ip -6 rule | grep 'from all fwmark 0xffff lookup 65535')" ]; then
+        ip -6 rule add fwmark 0xffff table 65535
     fi
 }
 
 #del_rule
 function del_ipv4_rule() {
-    if [ -n "$(ip route list table 100 | grep 'local default dev lo scope host')" ]; then
-        ip route del local default dev lo table 100
+    if [ -n "$(ip route list table 65535 | grep 'local default dev lo scope host')" ]; then
+        ip route del local default dev lo table 65535
     fi
-    if [ -n "$(ip rule | grep 'from all fwmark 0xfe lookup 100')" ]; then
-        ip rule del fwmark 254 table 100
+    if [ -n "$(ip rule | grep 'from all fwmark 0xffff lookup 65535')" ]; then
+        ip rule del fwmark 0xffff table 65535
     fi
 }
 function del_ipv6_rule() {
-    if [ -n "$(ip route list table 100 | grep 'local default dev lo scope host')" ]; then
-        ip route del local default dev lo table 100
+    if [ -n "$(ip route list table 65535 | grep 'local default dev lo scope host')" ]; then
+        ip route del local default dev lo table 65535
     fi
-    if [ -n "$(ip rule | grep 'from all fwmark 0xfe lookup 100')" ]; then
-        ip rule del fwmark 254 table 100
+    if [ -n "$(ip rule | grep 'from all fwmark 0xffff lookup 65535')" ]; then
+        ip rule del fwmark 0xffff table 65535
     fi
 
-    if [ -n "$(ip -6 route list table 100 | grep 'local default dev lo metric 1024 pref medium')" ]; then
-        ip -6 route del local default dev lo table 100
+    if [ -n "$(ip -6 route list table 65535 | grep 'local default dev lo metric 1024 pref medium')" ]; then
+        ip -6 route del local default dev lo table 65535
     fi
-    if [ -n "$(ip -6 rule | grep 'from all fwmark 0xfe lookup 100')" ]; then
-        ip -6 rule del fwmark 254 table 100
+    if [ -n "$(ip -6 rule | grep 'from all fwmark 0xffff lookup 65535')" ]; then
+        ip -6 rule del fwmark 0xffff table 65535
     fi
 }
 
@@ -210,38 +210,38 @@ function enable_ipv4_tproxy() {
     if [ -z "$(iptables --list -t mangle | grep 'TPROXY')" ]; then
         iptables -t mangle -A PREROUTING -m set --match-set lan4 dst -j RETURN
         iptables -t mangle -A PREROUTING -m set --match-set wan4 dst -j RETURN
-        iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
-        iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
+        iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port "$PORT" --tproxy-mark 0xffff/0xffffffff
+        iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port "$PORT" --tproxy-mark 0xffff/0xffffffff
         iptables -t mangle -A OUTPUT -m set --match-set lan4 dst -j RETURN
         iptables -t mangle -A OUTPUT -m set --match-set wan4 dst -j RETURN
-        iptables -t mangle -A OUTPUT -m mark --mark 0xff/0xffffffff -j RETURN
-        iptables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xfe/0xffffffff
-        iptables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xfe/0xffffffff
+        iptables -t mangle -A OUTPUT -m mark --mark "$MARK"/0xffffffff -j RETURN
+        iptables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xffff
+        iptables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xffff
     fi
 }
 function enable_ipv6_tproxy() {
     if [ -z "$(iptables --list -t mangle | grep 'TPROXY')" ]; then
         iptables -t mangle -A PREROUTING -m set --match-set lan4 dst -j RETURN
         iptables -t mangle -A PREROUTING -m set --match-set wan4 dst -j RETURN
-        iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
-        iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
+        iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port "$PORT" --tproxy-mark 0xffff/0xffffffff
+        iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port "$PORT" --tproxy-mark 0xffff/0xffffffff
         iptables -t mangle -A OUTPUT -m set --match-set lan4 dst -j RETURN
         iptables -t mangle -A OUTPUT -m set --match-set wan4 dst -j RETURN
-        iptables -t mangle -A OUTPUT -m mark --mark 0xff/0xffffffff -j RETURN
-        iptables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xfe/0xffffffff
-        iptables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xfe/0xffffffff
+        iptables -t mangle -A OUTPUT -m mark --mark "$MARK"/0xffffffff -j RETURN
+        iptables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xffff
+        iptables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xffff
     fi
 
     if [ -z "$(ip6tables --list -t mangle | grep 'TPROXY')" ]; then
         ip6tables -t mangle -A PREROUTING -m set --match-set lan6 dst -j RETURN
         ip6tables -t mangle -A PREROUTING -m set --match-set wan6 dst -j RETURN
-        ip6tables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip ::1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
-        ip6tables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip ::1 --on-port 1080 --tproxy-mark 0xfe/0xffffffff
+        ip6tables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip ::1 --on-port "$PORT" --tproxy-mark 0xffff/0xffffffff
+        ip6tables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip ::1 --on-port "$PORT" --tproxy-mark 0xffff/0xffffffff
         ip6tables -t mangle -A OUTPUT -m set --match-set lan6 dst -j RETURN
         ip6tables -t mangle -A OUTPUT -m set --match-set wan6 dst -j RETURN
-        ip6tables -t mangle -A OUTPUT -m mark --mark 0xff/0xffffffff -j RETURN
-        ip6tables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xfe/0xffffffff
-        ip6tables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xfe/0xffffffff
+        ip6tables -t mangle -A OUTPUT -m mark --mark "$MARK"/0xffffffff -j RETURN
+        ip6tables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xfe/0xffff
+        ip6tables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xfe/0xffff
     fi
 }
 
