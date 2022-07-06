@@ -54,22 +54,38 @@ function del_ipv6_rule() {
 function add_ipv4_set() {
     if [ -z "$(ipset --list | grep 'Name: lan4')" ]; then
         ipset create lan4 hash:net family inet hashsize 1024
+        ipset add lan4 0.0.0.0/8
         ipset add lan4 10.0.0.0/8
         ipset add lan4 100.64.0.0/10
         ipset add lan4 127.0.0.0/8
         ipset add lan4 169.254.0.0/16
         ipset add lan4 172.16.0.0/12
         ipset add lan4 192.168.0.0/16
+        ipset add lan4 192.0.0.0/24
+        ipset add lan4 192.0.2.0/24
+        ipset add lan4 192.88.99.0/24
+        ipset add lan4 192.168.0.0/16
+        ipset add lan4 198.18.0.0/15
+        ipset add lan4 198.51.100.0/24
+        ipset add lan4 203.0.113.0/24 
         ipset add lan4 224.0.0.0/3
         ipset add lan4 255.255.255.255/32
     else
         ipset flush lan4
+        ipset add lan4 0.0.0.0/8
         ipset add lan4 10.0.0.0/8
         ipset add lan4 100.64.0.0/10
         ipset add lan4 127.0.0.0/8
         ipset add lan4 169.254.0.0/16
         ipset add lan4 172.16.0.0/12
         ipset add lan4 192.168.0.0/16
+        ipset add lan4 192.0.0.0/24
+        ipset add lan4 192.0.2.0/24
+        ipset add lan4 192.88.99.0/24
+        ipset add lan4 192.168.0.0/16
+        ipset add lan4 198.18.0.0/15
+        ipset add lan4 198.51.100.0/24
+        ipset add lan4 203.0.113.0/24 
         ipset add lan4 224.0.0.0/3
         ipset add lan4 255.255.255.255/32
     fi
@@ -87,22 +103,38 @@ function add_ipv4_set() {
 function add_ipv6_set() {
     if [ -z "$(ipset --list | grep 'Name: lan4')" ]; then
         ipset create lan4 hash:net family inet hashsize 1024
+        ipset add lan4 0.0.0.0/8
         ipset add lan4 10.0.0.0/8
         ipset add lan4 100.64.0.0/10
         ipset add lan4 127.0.0.0/8
         ipset add lan4 169.254.0.0/16
         ipset add lan4 172.16.0.0/12
         ipset add lan4 192.168.0.0/16
+        ipset add lan4 192.0.0.0/24
+        ipset add lan4 192.0.2.0/24
+        ipset add lan4 192.88.99.0/24
+        ipset add lan4 192.168.0.0/16
+        ipset add lan4 198.18.0.0/15
+        ipset add lan4 198.51.100.0/24
+        ipset add lan4 203.0.113.0/24 
         ipset add lan4 224.0.0.0/3
         ipset add lan4 255.255.255.255/32
     else
         ipset flush lan4
+        ipset add lan4 0.0.0.0/8
         ipset add lan4 10.0.0.0/8
         ipset add lan4 100.64.0.0/10
         ipset add lan4 127.0.0.0/8
         ipset add lan4 169.254.0.0/16
         ipset add lan4 172.16.0.0/12
         ipset add lan4 192.168.0.0/16
+        ipset add lan4 192.0.0.0/24
+        ipset add lan4 192.0.2.0/24
+        ipset add lan4 192.88.99.0/24
+        ipset add lan4 192.168.0.0/16
+        ipset add lan4 198.18.0.0/15
+        ipset add lan4 198.51.100.0/24
+        ipset add lan4 203.0.113.0/24 
         ipset add lan4 224.0.0.0/3
         ipset add lan4 255.255.255.255/32
     fi
@@ -124,7 +156,12 @@ function add_ipv6_set() {
         ipset add lan6 ::ffff:0:0/96
         ipset add lan6 ::ffff:0:0:0/96
         ipset add lan6 64:ff9b::/96
+        ipset add lan6 64:ff9b:1::/48
         ipset add lan6 100::/64
+        ipset add lan6 2001:0000::/32
+        ipset add lan6 2001:20::/28
+        ipset add lan6 2001:db8::/32
+        ipset add lan6 2002::/16
         ipset add lan6 fc00::/7
         ipset add lan6 fe80::/10
         ipset add lan6 ff00::/8
@@ -135,7 +172,12 @@ function add_ipv6_set() {
         ipset add lan6 ::ffff:0:0/96
         ipset add lan6 ::ffff:0:0:0/96
         ipset add lan6 64:ff9b::/96
+        ipset add lan6 64:ff9b:1::/48
         ipset add lan6 100::/64
+        ipset add lan6 2001:0000::/32
+        ipset add lan6 2001:20::/28
+        ipset add lan6 2001:db8::/32
+        ipset add lan6 2002::/16
         ipset add lan6 fc00::/7
         ipset add lan6 fe80::/10
         ipset add lan6 ff00::/8
