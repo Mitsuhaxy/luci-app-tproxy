@@ -14,22 +14,16 @@ port=$(uci get tproxy.@general[0].port)
 mark=$(uci get tproxy.@general[0].mark)
 
 start_service() {
-    if [ "$enabled" -eq "0" ]; then
-        exit 1
+    if [ "$enabled" = "enabled" ]; then
+        start_"$mode"_service
     fi
-    start_"$mode"_service
-}
-
-stop_service() {
-    stop_all_service
-}
-
-restart_service() {
-    restart_"$mode"_service
 }
 
 reload_service() {
-    restart_"$mode"_service
+    stop_all_service
+    if [ "$enabled" = "enabled" ]; then
+        start_"$mode"_service
+    fi
 }
 
 service_triggers() {

@@ -203,11 +203,3 @@ function start_ipv6_service() {
     enable_ipv4_tproxy
     enable_ipv6_tproxy
 }
-
-#restart_service
-function restart_ipv4_service() {
-    start_ipv4_service
-}
-function restart_ipv6_service() {
-    start_ipv6_service
-}

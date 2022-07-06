@@ -23,7 +23,10 @@ return view.extend({
 
         s.tab('general', _('General Settings'));
 
-        o = s.taboption('general', form.Flag, 'enabled', _('Enable transparent proxy'))
+        o = s.taboption('general', form.ListValue, 'enabled', _('Enable transparent proxy'))
+        o.datatype = "string"
+        o.value("enabled", _("enabled"))
+        o.value("disabled", _("disabled"))
 
         o = s.taboption('general', form.ListValue, 'mode', _('Transparent proxy mode'))
         o.value("ipv4", "ipv4")
