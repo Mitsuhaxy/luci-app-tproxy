@@ -160,16 +160,20 @@ function disable_ipv4_tproxy() {
     if [ -n "$(iptables --list -t mangle | grep 'TP_')" ]; then
         iptables -t mangle --flush PREROUTING
         iptables -t mangle --flush OUTPUT
-        iptables -t mangle --delete TP_PREROUTING
-        iptables -t mangle --delete TP_OUTPUT
+        iptables -t mangle --flush TP_PREROUTING
+        iptables -t mangle --flush TP_OUTPUT
+        iptables -t mangle --delete-chain TP_PREROUTING
+        iptables -t mangle --delete-chain TP_OUTPUT
     fi
 }
 function disable_ipv6_tproxy() {
     if [ -n "$(ip6tables --list -t mangle | grep 'TP_')" ]; then
         ip6tables -t mangle --flush PREROUTING
         ip6tables -t mangle --flush OUTPUT
-        ip6tables -t mangle --delete TP_PREROUTING
-        ip6tables -t mangle --delete TP_OUTPUT
+        ip6tables -t mangle --flush TP_PREROUTING
+        ip6tables -t mangle --flush TP_OUTPUT
+        ip6tables -t mangle --delete-chain TP_PREROUTING
+        ip6tables -t mangle --delete-chain TP_OUTPUT
     fi
 }
 
