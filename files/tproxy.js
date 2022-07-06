@@ -7,6 +7,12 @@
 'require tools.widgets as widgets';
 
 return view.extend({
+    load: function () {
+        return Promise.all([
+            uci.load("tproxy")
+        ])
+    },
+
     render: function () {
         var m, s, o;
         m = new form.Map('tproxy', _('trpoxy'), _('Easy set transparent proxy'));
