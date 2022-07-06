@@ -54,22 +54,38 @@ function del_ipv6_rule() {
 function add_ipv4_set() {
     if [ -z "$(ipset --list | grep 'Name: lan4')" ]; then
         ipset create lan4 hash:net family inet hashsize 1024
+        ipset add lan4 0.0.0.0/8
         ipset add lan4 10.0.0.0/8
         ipset add lan4 100.64.0.0/10
         ipset add lan4 127.0.0.0/8
         ipset add lan4 169.254.0.0/16
         ipset add lan4 172.16.0.0/12
         ipset add lan4 192.168.0.0/16
+        ipset add lan4 192.0.0.0/24
+        ipset add lan4 192.0.2.0/24
+        ipset add lan4 192.88.99.0/24
+        ipset add lan4 192.168.0.0/16
+        ipset add lan4 198.18.0.0/15
+        ipset add lan4 198.51.100.0/24
+        ipset add lan4 203.0.113.0/24 
         ipset add lan4 224.0.0.0/3
         ipset add lan4 255.255.255.255/32
     else
         ipset flush lan4
+        ipset add lan4 0.0.0.0/8
         ipset add lan4 10.0.0.0/8
         ipset add lan4 100.64.0.0/10
         ipset add lan4 127.0.0.0/8
         ipset add lan4 169.254.0.0/16
         ipset add lan4 172.16.0.0/12
         ipset add lan4 192.168.0.0/16
+        ipset add lan4 192.0.0.0/24
+        ipset add lan4 192.0.2.0/24
+        ipset add lan4 192.88.99.0/24
+        ipset add lan4 192.168.0.0/16
+        ipset add lan4 198.18.0.0/15
+        ipset add lan4 198.51.100.0/24
+        ipset add lan4 203.0.113.0/24 
         ipset add lan4 224.0.0.0/3
         ipset add lan4 255.255.255.255/32
     fi
@@ -87,22 +103,38 @@ function add_ipv4_set() {
 function add_ipv6_set() {
     if [ -z "$(ipset --list | grep 'Name: lan4')" ]; then
         ipset create lan4 hash:net family inet hashsize 1024
+        ipset add lan4 0.0.0.0/8
         ipset add lan4 10.0.0.0/8
         ipset add lan4 100.64.0.0/10
         ipset add lan4 127.0.0.0/8
         ipset add lan4 169.254.0.0/16
         ipset add lan4 172.16.0.0/12
         ipset add lan4 192.168.0.0/16
+        ipset add lan4 192.0.0.0/24
+        ipset add lan4 192.0.2.0/24
+        ipset add lan4 192.88.99.0/24
+        ipset add lan4 192.168.0.0/16
+        ipset add lan4 198.18.0.0/15
+        ipset add lan4 198.51.100.0/24
+        ipset add lan4 203.0.113.0/24 
         ipset add lan4 224.0.0.0/3
         ipset add lan4 255.255.255.255/32
     else
         ipset flush lan4
+        ipset add lan4 0.0.0.0/8
         ipset add lan4 10.0.0.0/8
         ipset add lan4 100.64.0.0/10
         ipset add lan4 127.0.0.0/8
         ipset add lan4 169.254.0.0/16
         ipset add lan4 172.16.0.0/12
         ipset add lan4 192.168.0.0/16
+        ipset add lan4 192.0.0.0/24
+        ipset add lan4 192.0.2.0/24
+        ipset add lan4 192.88.99.0/24
+        ipset add lan4 192.168.0.0/16
+        ipset add lan4 198.18.0.0/15
+        ipset add lan4 198.51.100.0/24
+        ipset add lan4 203.0.113.0/24 
         ipset add lan4 224.0.0.0/3
         ipset add lan4 255.255.255.255/32
     fi
@@ -124,7 +156,12 @@ function add_ipv6_set() {
         ipset add lan6 ::ffff:0:0/96
         ipset add lan6 ::ffff:0:0:0/96
         ipset add lan6 64:ff9b::/96
+        ipset add lan6 64:ff9b:1::/48
         ipset add lan6 100::/64
+        ipset add lan6 2001:0000::/32
+        ipset add lan6 2001:20::/28
+        ipset add lan6 2001:db8::/32
+        ipset add lan6 2002::/16
         ipset add lan6 fc00::/7
         ipset add lan6 fe80::/10
         ipset add lan6 ff00::/8
@@ -135,7 +172,12 @@ function add_ipv6_set() {
         ipset add lan6 ::ffff:0:0/96
         ipset add lan6 ::ffff:0:0:0/96
         ipset add lan6 64:ff9b::/96
+        ipset add lan6 64:ff9b:1::/48
         ipset add lan6 100::/64
+        ipset add lan6 2001:0000::/32
+        ipset add lan6 2001:20::/28
+        ipset add lan6 2001:db8::/32
+        ipset add lan6 2002::/16
         ipset add lan6 fc00::/7
         ipset add lan6 fe80::/10
         ipset add lan6 ff00::/8
@@ -208,40 +250,46 @@ function del_ipv6_set() {
 #enable_tproxy
 function enable_ipv4_tproxy() {
     if [ -z "$(iptables --list -t mangle | grep 'TPROXY')" ]; then
-        iptables -t mangle -A PREROUTING -m set --match-set lan4 dst -j RETURN
-        iptables -t mangle -A PREROUTING -m set --match-set wan4 dst -j RETURN
-        iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port "$PORT" --tproxy-mark 0xffff/0xffffffff
-        iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port "$PORT" --tproxy-mark 0xffff/0xffffffff
-        iptables -t mangle -A OUTPUT -m set --match-set lan4 dst -j RETURN
-        iptables -t mangle -A OUTPUT -m set --match-set wan4 dst -j RETURN
-        iptables -t mangle -A OUTPUT -m mark --mark "$MARK"/0xffffffff -j RETURN
-        iptables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xffff
-        iptables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xffff
+        iptables -t mangle -N TP_PREROUTING
+        iptables -t mangle -N TP_OUTPUT
+        iptables -t mangle -A TP_PREROUTING -m set --match-set lan4 dst -j RETURN
+        iptables -t mangle -A TP_PREROUTING -m set --match-set wan4 dst -j RETURN
+        iptables -t mangle -A TP_PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port "$PORT" --tproxy-mark 0xffff/0xffffffff
+        iptables -t mangle -A TP_PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port "$PORT" --tproxy-mark 0xffff/0xffffffff
+        iptables -t mangle -A TP_OUTPUT -m set --match-set lan4 dst -j RETURN
+        iptables -t mangle -A TP_OUTPUT -m set --match-set wan4 dst -j RETURN
+        iptables -t mangle -A TP_OUTPUT -m mark --mark "$MARK"/0xffffffff -j RETURN
+        iptables -t mangle -A TP_OUTPUT -p tcp -j MARK --set-mark 0xffff
+        iptables -t mangle -A TP_OUTPUT -p udp -j MARK --set-mark 0xffff
     fi
 }
 function enable_ipv6_tproxy() {
     if [ -z "$(iptables --list -t mangle | grep 'TPROXY')" ]; then
-        iptables -t mangle -A PREROUTING -m set --match-set lan4 dst -j RETURN
-        iptables -t mangle -A PREROUTING -m set --match-set wan4 dst -j RETURN
-        iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port "$PORT" --tproxy-mark 0xffff/0xffffffff
-        iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port "$PORT" --tproxy-mark 0xffff/0xffffffff
-        iptables -t mangle -A OUTPUT -m set --match-set lan4 dst -j RETURN
-        iptables -t mangle -A OUTPUT -m set --match-set wan4 dst -j RETURN
-        iptables -t mangle -A OUTPUT -m mark --mark "$MARK"/0xffffffff -j RETURN
-        iptables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xffff
-        iptables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xffff
+        iptables -t mangle -N TP_PREROUTING
+        iptables -t mangle -N TP_OUTPUT
+        iptables -t mangle -A TP_PREROUTING -m set --match-set lan4 dst -j RETURN
+        iptables -t mangle -A TP_PREROUTING -m set --match-set wan4 dst -j RETURN
+        iptables -t mangle -A TP_PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port "$PORT" --tproxy-mark 0xffff/0xffffffff
+        iptables -t mangle -A TP_PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port "$PORT" --tproxy-mark 0xffff/0xffffffff
+        iptables -t mangle -A TP_OUTPUT -m set --match-set lan4 dst -j RETURN
+        iptables -t mangle -A TP_OUTPUT -m set --match-set wan4 dst -j RETURN
+        iptables -t mangle -A TP_OUTPUT -m mark --mark "$MARK"/0xffffffff -j RETURN
+        iptables -t mangle -A TP_OUTPUT -p tcp -j MARK --set-mark 0xffff
+        iptables -t mangle -A TP_OUTPUT -p udp -j MARK --set-mark 0xffff
     fi
 
     if [ -z "$(ip6tables --list -t mangle | grep 'TPROXY')" ]; then
-        ip6tables -t mangle -A PREROUTING -m set --match-set lan6 dst -j RETURN
-        ip6tables -t mangle -A PREROUTING -m set --match-set wan6 dst -j RETURN
-        ip6tables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip ::1 --on-port "$PORT" --tproxy-mark 0xffff/0xffffffff
-        ip6tables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip ::1 --on-port "$PORT" --tproxy-mark 0xffff/0xffffffff
-        ip6tables -t mangle -A OUTPUT -m set --match-set lan6 dst -j RETURN
-        ip6tables -t mangle -A OUTPUT -m set --match-set wan6 dst -j RETURN
-        ip6tables -t mangle -A OUTPUT -m mark --mark "$MARK"/0xffffffff -j RETURN
-        ip6tables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xffff
-        ip6tables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xffff
+        iptables -t mangle -N TP_PREROUTING
+        iptables -t mangle -N TP_OUTPUT
+        ip6tables -t mangle -A TP_PREROUTING -m set --match-set lan6 dst -j RETURN
+        ip6tables -t mangle -A TP_PREROUTING -m set --match-set wan6 dst -j RETURN
+        ip6tables -t mangle -A TP_PREROUTING -p tcp -j TPROXY --on-ip ::1 --on-port "$PORT" --tproxy-mark 0xffff/0xffffffff
+        ip6tables -t mangle -A TP_PREROUTING -p udp -j TPROXY --on-ip ::1 --on-port "$PORT" --tproxy-mark 0xffff/0xffffffff
+        ip6tables -t mangle -A TP_OUTPUT -m set --match-set lan6 dst -j RETURN
+        ip6tables -t mangle -A TP_OUTPUT -m set --match-set wan6 dst -j RETURN
+        ip6tables -t mangle -A TP_OUTPUT -m mark --mark "$MARK"/0xffffffff -j RETURN
+        ip6tables -t mangle -A TP_OUTPUT -p tcp -j MARK --set-mark 0xffff
+        ip6tables -t mangle -A TP_OUTPUT -p udp -j MARK --set-mark 0xffff
     fi
 }
 
