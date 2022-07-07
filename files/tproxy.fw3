@@ -143,8 +143,8 @@ function enable_ipv6_tproxy() {
         ip6tables -t mangle -N TP_OUTPUT
         ip6tables -t mangle -A TP_PREROUTING -m set --match-set lan6 dst -j RETURN
         ip6tables -t mangle -A TP_PREROUTING -m set --match-set wan6 dst -j RETURN
-        ip6tables -t mangle -A TP_PREROUTING -p tcp -j TPROXY --on-ip ::1 --on-port "$mark" --tproxy-mark 0xffff/0xffffffff
-        ip6tables -t mangle -A TP_PREROUTING -p udp -j TPROXY --on-ip ::1 --on-port "$mark" --tproxy-mark 0xffff/0xffffffff
+        ip6tables -t mangle -A TP_PREROUTING -p tcp -j TPROXY --on-ip ::1 --on-port "$port" --tproxy-mark 0xffff/0xffffffff
+        ip6tables -t mangle -A TP_PREROUTING -p udp -j TPROXY --on-ip ::1 --on-port "$port" --tproxy-mark 0xffff/0xffffffff
         ip6tables -t mangle -A TP_OUTPUT -m set --match-set lan6 dst -j RETURN
         ip6tables -t mangle -A TP_OUTPUT -m set --match-set wan6 dst -j RETURN
         ip6tables -t mangle -A TP_OUTPUT -m mark --mark "$mark"/0xffffffff -j RETURN

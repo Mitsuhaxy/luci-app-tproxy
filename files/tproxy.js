@@ -15,7 +15,7 @@ return view.extend({
 
     render: function () {
         var m, s, o;
-        m = new form.Map('tproxy', _('trpoxy'), _('Easy set transparent proxy'));
+        m = new form.Map('tproxy', _('tproxy'), _('Easy set transparent proxy'));
 
         s = m.section(form.TypedSection, 'general');
         s.addremove = false;
