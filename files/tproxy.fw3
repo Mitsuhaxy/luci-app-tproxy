@@ -121,7 +121,7 @@ function del_ipv6_set() {
 
 #enable_tproxy
 function enable_ipv4_tproxy() {
-    if [ -z "$(iptables --list -t mangle | grep 'TPROXY')" ]; then
+    if [ -z "$(iptables --list -t mangle | grep 'TP_')" ]; then
         iptables -t mangle -N TP_PREROUTING
         iptables -t mangle -N TP_OUTPUT
         iptables -t mangle -A TP_PREROUTING -m set --match-set lan4 dst -j RETURN
@@ -138,7 +138,7 @@ function enable_ipv4_tproxy() {
     fi
 }
 function enable_ipv6_tproxy() {
-    if [ -z "$(ip6tables --list -t mangle | grep 'TPROXY')" ]; then
+    if [ -z "$(ip6tables --list -t mangle | grep 'TP_')" ]; then
         ip6tables -t mangle -N TP_PREROUTING
         ip6tables -t mangle -N TP_OUTPUT
         ip6tables -t mangle -A TP_PREROUTING -m set --match-set lan6 dst -j RETURN

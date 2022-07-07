@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-tproxy
-PKG_VERSION:=3.5
+PKG_VERSION:=3.6
 PKG_RELEASE:=1
 
 PKG_LICENSE:=MIT
@@ -36,11 +36,13 @@ define Package/luci-app-tproxy/install
 	$(INSTALL_DIR) $(1)/usr/share/rpcd/acl.d/
 	$(INSTALL_DIR) $(1)/usr/share/luci/menu.d/
 	$(INSTALL_DIR) $(1)/www/luci-static/resources/view/network/
+	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
 	$(INSTALL_BIN) ./files/tproxy.init $(1)/etc/init.d/tproxy
 	$(INSTALL_CONF) ./files/tproxy.conf $(1)/etc/config/tproxy
 	$(INSTALL_CONF) ./files/tproxy.acl $(1)/usr/share/rpcd/acl.d/luci-app-tproxy.json
 	$(INSTALL_CONF) ./files/tproxy.menu $(1)/usr/share/luci/menu.d/luci-app-tproxy.json
 	$(INSTALL_CONF) ./files/tproxy.js $(1)/www/luci-static/resources/view/network/tproxy.js
+	po2lmo ./files/tproxy.zh-cn.po $(1)/usr/lib/lua/luci/i18n/tproxy.zh-cn.lmo
 ifdef CONFIG_PACKAGE_firewall
 	$(INSTALL_DIR) $(1)/usr/bin/
 	$(INSTALL_BIN) ./files/tproxy.fw3 $(1)/usr/bin/tproxy
