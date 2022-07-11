@@ -1,4 +1,4 @@
-# TPROXY
+# MINIPROXY
 
 ## Easy set transparent proxy for openwrt
 

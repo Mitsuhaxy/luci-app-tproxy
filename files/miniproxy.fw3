@@ -59,14 +59,14 @@ function add_ipv4_set() {
     ipset add lan4 224.0.0.0/3
     ipset add lan4 255.255.255.255/32
 
-    while ! ping -c 1 119.29.29.29 >/dev/null; do sleep 1; done
-
     if [ -z "$(ipset --list | grep 'Name: wan4')" ]; then
         ipset create wan4 hash:net family inet hashsize 1024
     else
         ipset flush wan4
     fi
-    ipset add wan4 $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')
+    if [ "$auto_reload" = "enabled" ]; then
+        ipset add wan4 $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')
+    fi
 }
 function add_ipv6_set() {
     if [ -z "$(ipset --list | grep 'Name: lan6')" ]; then
@@ -89,14 +89,14 @@ function add_ipv6_set() {
     ipset add lan6 fe80::/10
     ipset add lan6 ff00::/8
 
-    while ! ping6 -c 1 2402:4e00:: >/dev/null; do sleep 1; done
-
     if [ -z "$(ipset --list | grep 'Name: wan6')" ]; then
         ipset create wan6 hash:net family inet6 hashsize 1024
     else
         ipset flush wan6
     fi
-    ipset add wan6 $(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].address')/$(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].mask')
+    if [ "$auto_reload" = "enabled" ]; then
+        ipset add wan6 $(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].address')/$(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].mask')
+    fi
 }
 
 #del_set
@@ -123,35 +123,47 @@ function del_ipv6_set() {
 function enable_ipv4_tproxy() {
     if [ -z "$(iptables --list -t mangle | grep 'TP_')" ]; then
         iptables -t mangle -N TP_PREROUTING
-        iptables -t mangle -N TP_OUTPUT
         iptables -t mangle -A TP_PREROUTING -m set --match-set lan4 dst -j RETURN
         iptables -t mangle -A TP_PREROUTING -m set --match-set wan4 dst -j RETURN
         iptables -t mangle -A TP_PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port "$port" --tproxy-mark 0xffff/0xffffffff
         iptables -t mangle -A TP_PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port "$port" --tproxy-mark 0xffff/0xffffffff
-        iptables -t mangle -A TP_OUTPUT -m set --match-set lan4 dst -j RETURN
-        iptables -t mangle -A TP_OUTPUT -m set --match-set wan4 dst -j RETURN
-        iptables -t mangle -A TP_OUTPUT -m mark --mark "$mark"/0xffffffff -j RETURN
-        iptables -t mangle -A TP_OUTPUT -p tcp -j MARK --set-mark 0xffff
-        iptables -t mangle -A TP_OUTPUT -p udp -j MARK --set-mark 0xffff
         iptables -t mangle -A PREROUTING -j TP_PREROUTING
-        iptables -t mangle -A OUTPUT -j TP_OUTPUT
+        if [ "$mark" = "0" ]; then
+            iptables -t mangle -N TP_OUTPUT
+            iptables -t mangle -A OUTPUT -j TP_OUTPUT
+        else
+            iptables -t mangle -N TP_OUTPUT
+            iptables -t mangle -A TP_OUTPUT -m set --match-set lan4 dst -j RETURN
+            iptables -t mangle -A TP_OUTPUT -m set --match-set wan4 dst -j RETURN
+            iptables -t mangle -A TP_OUTPUT -m mark --mark "$mark"/0xffffffff -j RETURN
+            iptables -t mangle -A TP_OUTPUT -p tcp -j MARK --set-mark 0xffff
+            iptables -t mangle -A TP_OUTPUT -p udp -j MARK --set-mark 0xffff
+            iptables -t mangle -A OUTPUT -j TP_OUTPUT
+
+        fi
     fi
 }
 function enable_ipv6_tproxy() {
     if [ -z "$(ip6tables --list -t mangle | grep 'TP_')" ]; then
         ip6tables -t mangle -N TP_PREROUTING
-        ip6tables -t mangle -N TP_OUTPUT
         ip6tables -t mangle -A TP_PREROUTING -m set --match-set lan6 dst -j RETURN
         ip6tables -t mangle -A TP_PREROUTING -m set --match-set wan6 dst -j RETURN
         ip6tables -t mangle -A TP_PREROUTING -p tcp -j TPROXY --on-ip ::1 --on-port "$port" --tproxy-mark 0xffff/0xffffffff
         ip6tables -t mangle -A TP_PREROUTING -p udp -j TPROXY --on-ip ::1 --on-port "$port" --tproxy-mark 0xffff/0xffffffff
-        ip6tables -t mangle -A TP_OUTPUT -m set --match-set lan6 dst -j RETURN
-        ip6tables -t mangle -A TP_OUTPUT -m set --match-set wan6 dst -j RETURN
-        ip6tables -t mangle -A TP_OUTPUT -m mark --mark "$mark"/0xffffffff -j RETURN
-        ip6tables -t mangle -A TP_OUTPUT -p tcp -j MARK --set-mark 0xffff
-        ip6tables -t mangle -A TP_OUTPUT -p udp -j MARK --set-mark 0xffff
         ip6tables -t mangle -A PREROUTING -j TP_PREROUTING
-        ip6tables -t mangle -A OUTPUT -j TP_OUTPUT
+        if [ "$mark" = "0" ]; then
+            ip6tables -t mangle -N TP_OUTPUT
+            ip6tables -t mangle -A OUTPUT -j TP_OUTPUT
+        else
+            ip6tables -t mangle -N TP_OUTPUT
+            ip6tables -t mangle -A TP_OUTPUT -m set --match-set lan6 dst -j RETURN
+            ip6tables -t mangle -A TP_OUTPUT -m set --match-set wan6 dst -j RETURN
+            ip6tables -t mangle -A TP_OUTPUT -m mark --mark "$mark"/0xffffffff -j RETURN
+            ip6tables -t mangle -A TP_OUTPUT -p tcp -j MARK --set-mark 0xffff
+            ip6tables -t mangle -A TP_OUTPUT -p udp -j MARK --set-mark 0xffff
+            ip6tables -t mangle -A OUTPUT -j TP_OUTPUT
+
+        fi
     fi
 }
 
@@ -177,6 +189,16 @@ function disable_ipv6_tproxy() {
     fi
 }
 
+#check_network
+function check_ipv4_network() {
+    while ! ping -c 1 119.29.29.29 >/dev/null; do sleep 1; done
+}
+
+function check_ipv6_network() {
+    while ! ping -c 1 119.29.29.29 >/dev/null; do sleep 1; done
+    while ! ping6 -c 1 2402:4e00:: >/dev/null; do sleep 1; done
+}
+
 #stop_service
 function stop_all_service() {
     disable_ipv4_tproxy
@@ -190,12 +212,14 @@ function stop_all_service() {
 #start_service
 function start_ipv4_service() {
     stop_all_service
+    check_ipv4_network
     add_ipv4_rule
     add_ipv4_set
     enable_ipv4_tproxy
 }
 function start_ipv6_service() {
     stop_all_service
+    check_ipv6_network
     add_ipv4_rule
     add_ipv6_rule
     add_ipv4_set

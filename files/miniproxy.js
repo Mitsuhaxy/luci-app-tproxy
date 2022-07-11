@@ -9,13 +9,13 @@
 return view.extend({
     load: function () {
         return Promise.all([
-            uci.load("tproxy")
+            uci.load("miniproxy")
         ])
     },
 
     render: function () {
         var m, s, o;
-        m = new form.Map('tproxy', _('tproxy'), _('Easy set transparent proxy'));
+        m = new form.Map('miniproxy', _('miniproxy'), _('Easy set transparent proxy'));
 
         s = m.section(form.TypedSection, 'general');
         s.addremove = false;
@@ -37,8 +37,8 @@ return view.extend({
         o.datatype = 'port'
         o.placeholder = '1080'
 
-        o = s.taboption('general', form.Value, 'mark', _('Transparent proxy mark'))
-        o.datatype = 'range(1, 255)'
+        o = s.taboption('general', form.Value, 'mark', _('Transparent proxy mark'), _('If the mark value is 0, the will be disabled, and the local proxy will be turned off, LAN devices will not be affected.'))
+        o.datatype = 'range(0, 255)'
         o.default = 255
 
         return m.render();
