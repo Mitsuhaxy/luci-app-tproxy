@@ -121,71 +121,48 @@ function del_ipv6_set() {
 
 #enable_tproxy
 function enable_ipv4_tproxy() {
-    if [ -z "$(iptables --list -t mangle | grep 'TP_')" ]; then
-        iptables -t mangle -N TP_PREROUTING
-        iptables -t mangle -A TP_PREROUTING -m set --match-set lan4 dst -j RETURN
-        iptables -t mangle -A TP_PREROUTING -m set --match-set wan4 dst -j RETURN
-        iptables -t mangle -A TP_PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port "$port" --tproxy-mark 0xffff/0xffffffff
-        iptables -t mangle -A TP_PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port "$port" --tproxy-mark 0xffff/0xffffffff
-        iptables -t mangle -A PREROUTING -j TP_PREROUTING
-        if [ "$mark" = "0" ]; then
-            iptables -t mangle -N TP_OUTPUT
-            iptables -t mangle -A OUTPUT -j TP_OUTPUT
-        else
-            iptables -t mangle -N TP_OUTPUT
-            iptables -t mangle -A TP_OUTPUT -m set --match-set lan4 dst -j RETURN
-            iptables -t mangle -A TP_OUTPUT -m set --match-set wan4 dst -j RETURN
-            iptables -t mangle -A TP_OUTPUT -m mark --mark "$mark"/0xffffffff -j RETURN
-            iptables -t mangle -A TP_OUTPUT -p tcp -j MARK --set-mark 0xffff
-            iptables -t mangle -A TP_OUTPUT -p udp -j MARK --set-mark 0xffff
-            iptables -t mangle -A OUTPUT -j TP_OUTPUT
+    if [ -z "$(iptables --list -t mangle | grep 'TPROXY')" ]; then
+        iptables -t mangle -A PREROUTING -m set --match-set lan4 dst -j RETURN
+        iptables -t mangle -A PREROUTING -m set --match-set wan4 dst -j RETURN
+        iptables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip 127.0.0.1 --on-port "$port" --tproxy-mark 0xffff/0xffffffff
+        iptables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip 127.0.0.1 --on-port "$port" --tproxy-mark 0xffff/0xffffffff
+        if [ "$mark" != "0" ]; then
+            iptables -t mangle -A OUTPUT -m set --match-set lan4 dst -j RETURN
+            iptables -t mangle -A OUTPUT -m set --match-set wan4 dst -j RETURN
+            iptables -t mangle -A OUTPUT -m mark --mark "$mark"/0xffffffff -j RETURN
+            iptables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xffff
+            iptables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xffff
 
         fi
     fi
 }
 function enable_ipv6_tproxy() {
-    if [ -z "$(ip6tables --list -t mangle | grep 'TP_')" ]; then
-        ip6tables -t mangle -N TP_PREROUTING
-        ip6tables -t mangle -A TP_PREROUTING -m set --match-set lan6 dst -j RETURN
-        ip6tables -t mangle -A TP_PREROUTING -m set --match-set wan6 dst -j RETURN
-        ip6tables -t mangle -A TP_PREROUTING -p tcp -j TPROXY --on-ip ::1 --on-port "$port" --tproxy-mark 0xffff/0xffffffff
-        ip6tables -t mangle -A TP_PREROUTING -p udp -j TPROXY --on-ip ::1 --on-port "$port" --tproxy-mark 0xffff/0xffffffff
-        ip6tables -t mangle -A PREROUTING -j TP_PREROUTING
-        if [ "$mark" = "0" ]; then
-            ip6tables -t mangle -N TP_OUTPUT
-            ip6tables -t mangle -A OUTPUT -j TP_OUTPUT
-        else
-            ip6tables -t mangle -N TP_OUTPUT
-            ip6tables -t mangle -A TP_OUTPUT -m set --match-set lan6 dst -j RETURN
-            ip6tables -t mangle -A TP_OUTPUT -m set --match-set wan6 dst -j RETURN
-            ip6tables -t mangle -A TP_OUTPUT -m mark --mark "$mark"/0xffffffff -j RETURN
-            ip6tables -t mangle -A TP_OUTPUT -p tcp -j MARK --set-mark 0xffff
-            ip6tables -t mangle -A TP_OUTPUT -p udp -j MARK --set-mark 0xffff
-            ip6tables -t mangle -A OUTPUT -j TP_OUTPUT
-
+    if [ -z "$(ip6tables --list -t mangle | grep 'TPROXY')" ]; then
+        ip6tables -t mangle -A PREROUTING -m set --match-set lan6 dst -j RETURN
+        ip6tables -t mangle -A PREROUTING -m set --match-set wan6 dst -j RETURN
+        ip6tables -t mangle -A PREROUTING -p tcp -j TPROXY --on-ip ::1 --on-port "$port" --tproxy-mark 0xffff/0xffffffff
+        ip6tables -t mangle -A PREROUTING -p udp -j TPROXY --on-ip ::1 --on-port "$port" --tproxy-mark 0xffff/0xffffffff
+        if [ "$mark" != "0" ]; then
+            ip6tables -t mangle -A OUTPUT -m set --match-set lan6 dst -j RETURN
+            ip6tables -t mangle -A OUTPUT -m set --match-set wan6 dst -j RETURN
+            ip6tables -t mangle -A OUTPUT -m mark --mark "$mark"/0xffffffff -j RETURN
+            ip6tables -t mangle -A OUTPUT -p tcp -j MARK --set-mark 0xffff
+            ip6tables -t mangle -A OUTPUT -p udp -j MARK --set-mark 0xffff
         fi
     fi
 }
 
 #disable_tproxy
 function disable_ipv4_tproxy() {
-    if [ -n "$(iptables --list -t mangle | grep 'TP_')" ]; then
+    if [ -n "$(iptables --list -t mangle | grep 'TPROXY')" ]; then
         iptables -t mangle --flush PREROUTING
         iptables -t mangle --flush OUTPUT
-        iptables -t mangle --flush TP_PREROUTING
-        iptables -t mangle --flush TP_OUTPUT
-        iptables -t mangle --delete-chain TP_PREROUTING
-        iptables -t mangle --delete-chain TP_OUTPUT
     fi
 }
 function disable_ipv6_tproxy() {
-    if [ -n "$(ip6tables --list -t mangle | grep 'TP_')" ]; then
+    if [ -n "$(ip6tables --list -t mangle | grep 'TPROXY')" ]; then
         ip6tables -t mangle --flush PREROUTING
         ip6tables -t mangle --flush OUTPUT
-        ip6tables -t mangle --flush TP_PREROUTING
-        ip6tables -t mangle --flush TP_OUTPUT
-        ip6tables -t mangle --delete-chain TP_PREROUTING
-        ip6tables -t mangle --delete-chain TP_OUTPUT
     fi
 }
 
