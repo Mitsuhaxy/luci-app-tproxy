@@ -64,9 +64,7 @@ function add_ipv4_set() {
     else
         ipset flush wan4
     fi
-    if [ "$auto_reload" = "enabled" ]; then
         ipset add wan4 $(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].address')/$(ifstatus wan | jsonfilter -e '@["ipv4-address"][0].mask')
-    fi
 }
 function add_ipv6_set() {
     if [ -z "$(ipset --list | grep 'Name: lan6')" ]; then
@@ -94,9 +92,7 @@ function add_ipv6_set() {
     else
         ipset flush wan6
     fi
-    if [ "$auto_reload" = "enabled" ]; then
         ipset add wan6 $(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].address')/$(ifstatus wan_6 | jsonfilter -e '@["ipv6-prefix"][0].mask')
-    fi
 }
 
 #del_set
